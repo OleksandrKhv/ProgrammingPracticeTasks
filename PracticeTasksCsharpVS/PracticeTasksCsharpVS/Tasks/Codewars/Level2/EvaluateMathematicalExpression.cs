@@ -51,168 +51,234 @@ NOTE: Both eval and Function are disabled. Same goes for String.match.
  */
 namespace PracticeTasksCsharpVS.Tasks.Codewars.Level2
 {
-    //TODO double brackets are not allowed: 1+((-1)), after parsing this will be 1+((-1, but it should work anyway... 
-    public class EvaluateMathematicalExpression//For now this is just a copy paste of calculator
+    public class EvaluateMathematicalExpression
     {
-        class Node
+        private abstract class Node
         {
-            public double Value;
-            public string Operation;
-            public Node[] Operands = new Node[2];
+            public List<Node> Operands;
             public Node Parent;
+
+            /// <summary>
+            /// // Holds index this node is in parents Operands[]
+            /// -1 if no parent
+            /// </summary>
+            public int ParentsChild = -1;
+
+            public abstract double CalculateValue();
+            public abstract string GetString();
 
             public void SetOperand(Node node, int position)
             {
                 node.Parent = this;
                 Operands[position] = node;
+                node.ParentsChild = position;
+            }
+
+            public void AddOperand(Node node)
+            {
+                Operands.Add(node);
+                SetOperand(node, Operands.Count - 1);
+            }
+
+            /// <summary>
+            /// Inserts current node below target
+            /// </summary>
+            /// <param name="target"></param>
+            public virtual void InsertBelowAsFirstOperand(Node target)
+            {
+                if (target.Operands.Count > 0)
+                {
+                    AddOperand(target.Operands.First());
+                }
+                target.SetOperand(this, 0);
+            }
+
+            /// <summary>
+            /// Inserts current node abowe target, makes it our first operand,
+            ///  and if target had parent makes us its operand, at position the target was
+            /// </summary>
+            /// <param name="target"></param>
+            public virtual void InsertAbowe(Node target)
+            {
+                if (target.Parent != null)
+                {
+                    target.Parent.SetOperand(this, target.ParentsChild);
+                }
+                AddOperand(target);
             }
         }
 
-        delegate double Operation(double a, double b);
+        private class ValueNode : Node
+        {
+            public double Value;
+            public override double CalculateValue()
+            {
+                return Value;
+            }
 
-        Dictionary<string, Operation> Operators = new Dictionary<string, Operation> {
-            {"+", delegate (double a, double b) { return a+b; } },
-            {"-", delegate (double a, double b) { return a-b; } },
-            {"*", delegate (double a, double b) { return a*b; } },
-            {"/", delegate (double a, double b) { return a/b; } },
-            {"+u", delegate (double a, double b) { return b; } },
-            {"-u", delegate (double a, double b) { return -b; } },
+            public override void InsertAbowe(Node target)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override string GetString()
+            {
+                return Value.ToString();
+            }
+        }
+
+        private class OperatorNode : Node {
+            public string Operator;
+
+            public OperatorNode()
+            {
+                Operands = new List<Node>();
+            }
+            public override double CalculateValue()
+            {
+                double[] values = new double[Operands.Count];
+                for(int i = 0;i< Operands.Count; i++)
+                {
+                    values[i] = Operands[i].CalculateValue();
+                }
+                return Operators[Operator](values);
+            }
+
+            public override string GetString()
+            {
+                string[] values = new string[Operands.Count];
+                for (int i = 0; i < Operands.Count; i++)
+                {
+                    values[i] = Operands[i].GetString();
+                }
+                if (Operator.Last() == 'u')
+                {
+                    return Operator + values[0];
+                }
+                else
+                {
+                    return string.Format("{0} {1} {2}", values[0], Operator, values[1]);
+                }
+            }
+        }
+
+        class RootNode : Node
+        {
+            public RootNode()
+            {
+                Operands = new List<Node>();
+            }
+            public override double CalculateValue()
+            {
+                return Operands[0].CalculateValue();
+            }
+
+            public override string GetString()
+            {
+                if (Operands.Count > 0)
+                    return string.Format("({0})", Operands[0].GetString());
+                else
+                    return "()";// This is not normal, but useful to get some output...
+            }
+        }
+
+        delegate double Operation(double[] values);
+
+        static Dictionary<string, Operation> Operators = new Dictionary<string, Operation> {
+            {"+", delegate (double[] values) { return values[0]+values[1]; } },
+            {"-", delegate (double[] values) { return values[0]-values[1];} },
+            {"*", delegate (double[] values) { return values[0]*values[1]; } },
+            {"/", delegate (double[] values) { return values[0]/values[1]; } },
+            {"+u", delegate (double[] values) { return values[0]; } },
+            {"-u", delegate (double[] values) { return -values[0]; } },
         };
-
 
 
         public double App(string inp)
         {
             string[] elements = GetElements(inp);
-            Node current, root, newNode;
+            Node current, currentRoot, newNode;
             Stack<Node> roots = new Stack<Node>();
-            char prev = '+';
-            bool nextNumRoot = false;
+            char prevOperator = '+';
 
-            if (elements[0].Last() == 'u')
-            {
-                current = new Node { Operation = elements[0] };
-            }
-            else
-            {
-                current = new Node { Value = double.Parse(elements[0]) };
-            }
-            root = current;
-            roots.Push(root);
+            current = new RootNode();
+            currentRoot = current;
+            roots.Push(currentRoot);
 
-            for (int i = 1; i < elements.Length; i++)//"(2 / (2 + 3.33) * 4) - -6"
+            for (int i = 0; i < elements.Length; i++)//"(2 / (2 + 3.33) * 4) - -6"
             {
                 if (Operators.ContainsKey(elements[i]))
                 {
-                    newNode = new Node { Operation = elements[i] };
+                    newNode = new OperatorNode { Operator = elements[i] };
                     if (elements[i].Last() == 'u')
                     {
-                        current.SetOperand(newNode, 1);
-                        current = current.Operands[1];
+                        current.AddOperand(newNode);
                     }
                     else
                     {
-                        if (IsHigher(elements[i].First(), prev))
+                        if (IsHigher(elements[i].First(), prevOperator))
                         {
-                            if (current.Parent != null)
-                            {
-                                if (current.Parent.Operands[0] == current)
-                                {
-                                    current.Parent.SetOperand(newNode, 0);
-                                }
-                                else
-                                {
-                                    current.Parent.SetOperand(newNode, 1);
-                                }
-                            }
-                            newNode.SetOperand(current, 0);
-                            if (current == root)
-                            {
-                                root = newNode;
-                            }
+                            newNode.InsertAbowe(current);
                         }
                         else
                         {
-                            if (root.Parent != null)
-                            {
-                                if (root.Parent.Operands[0] == root)
-                                {
-                                    root.Parent.SetOperand(newNode, 0);
-                                }
-                                else
-                                {
-                                    root.Parent.SetOperand(newNode, 1);
-                                }
-                            }
-                            newNode.SetOperand(root, 0);
-                            root = newNode;
+                            newNode.InsertBelowAsFirstOperand(currentRoot);
                         }
-                        current = newNode;
-                        prev = elements[i][0];
+                        prevOperator = elements[i][0];
                     }
-                    if (nextNumRoot)
-                    {
-                        roots.Push(newNode);
-                        root = newNode;
-                        nextNumRoot = false;
-                    }
-                }
-                else if (char.IsDigit(elements[i].First())){
-                    newNode = new Node { Value = double.Parse(elements[i]) };
-                    current.SetOperand(newNode, 1);
                     current = newNode;
-                    if (nextNumRoot)
-                    {
-                        roots.Push(newNode);
-                        root = newNode;
-                        nextNumRoot = false;
-                    }
+                }
+                else if (char.IsDigit(elements[i].First()))
+                {
+                    newNode = new ValueNode { Value = double.Parse(elements[i]) };
+                    current.AddOperand(newNode);
+                    current = newNode;
                 }
                 else
                 {
                     if (elements[i][0] == '(')
                     {
-                        nextNumRoot = true;
+                        newNode = new RootNode();
+                        current.AddOperand(newNode);
+                        current = newNode;
+                        roots.Push(current);
+                        currentRoot = roots.Peek();
                     }
                     else if (elements[i][0] == ')')
                     {
-                        prev = '*';
-                        if (roots.Count > 1)
-                        {
-                            roots.Pop();
-                            root = roots.Peek();
-                            current = root;
-                        }
+                        prevOperator = '*';
+                        roots.Pop();
+                        currentRoot = roots.Peek();
+                        current = currentRoot;
                     }
                 }
             }
-            print(root);
-            return Calculate(root);
-        }//(2 / (2 + 3.33) * 4) - -6
-        //1+(2+1)+-2*1
+            TestContext.Out.Write(currentRoot.GetString());
+            return currentRoot.CalculateValue();
+        }
 
         bool IsBracket(char c)
         {
-            return c!= '(' && c != ')' ? false : true;
+            return c != '(' && c != ')' ? false : true;
         }
 
-        string[] GetElements(string inp)//"(2 / (2 + 3.33) * 4) - -6"
+        string[] GetElements(string inp)
         {
             List<string> elements = new List<string>();
-            char[] separators = new char[] {'+','-','*','/','(',')' };
+            char[] separators = new char[] { '+', '-', '*', '/', '(', ')' };
             inp = inp.Replace(".", ",");//double.Parse wont parse 1.0, dots, need to set format?
-            inp = inp.Replace(" ", "").TrimStart('(').TrimEnd(')');
+            inp = inp.Replace(" ", "");
             string[] numbers = RemoveSpaces(inp.Split(separators));
             bool isPrevAOperator = false;
-            
-            int i = 0,currentNum=0;
-            while(i < inp.Length)
+
+            int i = 0, currentNum = 0;
+            while (i < inp.Length)
             {
                 if (!char.IsDigit(inp[i]))
                 {
                     if (!IsBracket(inp[i]))
                     {
-                        elements.Add(inp[i].ToString() + (isPrevAOperator? "u" : ""));
+                        elements.Add(inp[i].ToString() + (isPrevAOperator ? "u" : ""));
                         isPrevAOperator = true;
                     }
                     else
@@ -234,41 +300,11 @@ namespace PracticeTasksCsharpVS.Tasks.Codewars.Level2
         string[] RemoveSpaces(string[] inp)
         {
             List<string> result = new List<string>();
-            foreach(string s in inp)
+            foreach (string s in inp)
             {
                 if (s.Length > 0) result.Add(s);
             }
             return result.ToArray();
-        }
-
-        void print(Node node)
-        {
-            TestContext.Out.Write(" v "+node.Value);
-            TestContext.Out.WriteLine(" o " + node.Operation);
-            if (node.Operands[0] != null) print(node.Operands[0]);
-            if (node.Operands[1] != null) print(node.Operands[1]);
-        }
-
-        double Calculate(Node node)
-        {
-            if(node == null)
-            {
-                return 0;
-            }
-            if (node.Operands[1] != null)
-            {
-                
-                double a, b;
-                a = Calculate(node.Operands[0]);
-                b = Calculate(node.Operands[1]);
-
-                TestContext.Out.WriteLine(a + node.Operation + b);
-                return Operators[node.Operation](a, b);
-            }
-            else
-            {
-                return node.Value;
-            }
         }
 
         bool IsHigher(char a, char b)//true for a>b
@@ -277,7 +313,7 @@ namespace PracticeTasksCsharpVS.Tasks.Codewars.Level2
             else return false;
         }
 
-        static object[] Data =
+        private static object[] Data =
         {
             new object[]{"1 + 2 * 5 - 1", 10},
             new object[]{ "2 / 2 + 3 * 4 - 6", 7 },
