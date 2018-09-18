@@ -67,7 +67,7 @@
     <Compile Include="Tasks\Codewars\Level3\LastDigitOfAHugeNumber.cs" />
     <Compile Include="Tasks\Codewars\Level4\AddingBigNumbers.cs" />
     <Compile Include="Tasks\Codewars\Level5\MoleculaToAtom.cs" />
-    <Compile Include="Tasks\Codewars\Level5\NextBiggerNumberWithSameDigits.cs" />
+    <Compile Include="Tasks\Codewars\Level4\NextBiggerNumberWithSameDigits.cs" />
     <Compile Include="Tasks\Codewars\Level6\NBonachi.cs" />
     <Compile Include="Tasks\Codewars\TODO.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -11,11 +11,9 @@ https://www.codewars.com/kata/break-the-pieces
 https://www.codewars.com/kata/break-the-pieces-evilized-edition
 
      https://www.codewars.com/kata/sum-of-intervals
-      https://www.codewars.com/kata/adding-big-numbers
     https://www.codewars.com/kata/the-millionth-fibonacci-kata
     https://www.codewars.com/kata/divide-numbers-as-strings
     https://www.codewars.com/kata/the-lift
-    https://www.codewars.com/kata/calculator
  * 
  * 
  */
