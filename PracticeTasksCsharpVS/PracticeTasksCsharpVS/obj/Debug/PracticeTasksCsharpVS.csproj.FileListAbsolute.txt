@@ -16,3 +16,6 @@ D:\VSProjects\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharp
 D:\VSProjects\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\obj\Debug\PracticeTasksCsharpVS.csproj.CopyComplete
 D:\VSProjects\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\obj\Debug\PracticeTasksCsharpVS.exe
 D:\VSProjects\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\obj\Debug\PracticeTasksCsharpVS.pdb
+C:\Users\admin\Desktop\VS_projects\1111\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\bin\Debug\PracticeTasksCsharpVS.exe.config
+C:\Users\admin\Desktop\VS_projects\1111\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\obj\Debug\PracticeTasksCsharpVS.exe
+C:\Users\admin\Desktop\VS_projects\1111\ProgrammingPracticeTasks\PracticeTasksCsharpVS\PracticeTasksCsharpVS\obj\Debug\PracticeTasksCsharpVS.pdb
