@@ -39,7 +39,7 @@ Note that brackets may be round, square or curly and can also be nested. Index a
             string digit;
             char c;
             Stack<int> multList = new Stack<int>();
-            int num = 1, mult = 1;
+            int num = 1, mult = 1, tmp;
 
             for (int i = molecula.Length - 1; i > -1; i--)
             {
@@ -73,7 +73,7 @@ Note that brackets may be round, square or curly and can also be nested. Index a
                     currentA = c + currentA;
                     if (char.IsUpper(c))
                     {
-                        if (result.TryGetValue(currentA, out int tmp))//Can we do a replace, not remove-add?
+                        if (result.TryGetValue(currentA, out tmp))//Can we do a replace, not remove-add?
                         {
                             result.Remove(currentA);
                         }
