@@ -71,6 +71,11 @@
     <Compile Include="Tasks\Codewars\Level4\NextBiggerNumberWithSameDigits.cs" />
     <Compile Include="Tasks\Codewars\Level6\NBonachi.cs" />
     <Compile Include="Tasks\Codewars\TODO.cs" />
+    <Compile Include="Tasks\Other\Level6\Fibonacci\FibonacciNth.cs" />
+    <Compile Include="Tasks\Other\Level6\Fibonacci\FirstNFibonacci.cs" />
+    <Compile Include="Tasks\Other\NotRanked\FindAllNumberSums.cs" />
+    <Compile Include="Util\Log.cs" />
+    <Compile Include="Util\RunnedTime.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
